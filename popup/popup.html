@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Path Switcher</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="hero">
+        <p class="eyebrow">Firefox Download Router</p>
+        <h1>Choose the active folder</h1>
+        <p class="subtle">
+          When a download finishes, the native helper moves it into the checked location.
+        </p>
+      </header>
+
+      <section class="panel">
+        <div class="panel-row">
+          <strong>Native helper</strong>
+          <span id="helper-status" class="status">Checking...</span>
+        </div>
+        <button id="check-helper" class="button button-secondary" type="button">Recheck helper</button>
+      </section>
+
+      <section class="panel">
+        <div class="panel-row">
+          <strong>Saved folders</strong>
+          <button id="open-options" class="link-button" type="button">Manage</button>
+        </div>
+        <div id="locations" class="locations" aria-live="polite"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-row">
+          <strong>Last result</strong>
+        </div>
+        <p id="last-result" class="result subtle">No download has been handled yet.</p>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+  </html>

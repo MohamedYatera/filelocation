@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Path Switcher Settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="intro">
+        <p class="eyebrow">Download Path Switcher</p>
+        <h1>Saved download destinations</h1>
+        <p class="lede">
+          Add the Windows folders you want to switch between. The checked item becomes the active destination for future completed downloads.
+        </p>
+      </section>
+
+      <section class="card">
+        <form id="location-form" class="form">
+          <div class="field">
+            <label for="location-name">Label</label>
+            <input id="location-name" name="location-name" type="text" placeholder="Invoices" required />
+          </div>
+
+          <div class="field">
+            <label for="location-path">Absolute Windows path</label>
+            <input id="location-path" name="location-path" type="text" placeholder="C:\Users\you\Documents\Invoices" required />
+          </div>
+
+          <button class="button" type="submit">Add folder</button>
+          <p id="form-status" class="status-text" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Folders</h2>
+        </div>
+        <div id="locations" class="locations"></div>
+      </section>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+  </html>

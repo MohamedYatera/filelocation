@@ -1,0 +1,164 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f2ea;
+  --card: #fffdf8;
+  --ink: #1e1a16;
+  --muted: #665d55;
+  --line: #d8cab7;
+  --accent: #17594a;
+  --accent-soft: #e3f0ec;
+  --danger: #9b3d2b;
+  --shadow: 0 10px 30px rgba(56, 37, 19, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 360px;
+  background:
+    radial-gradient(circle at top right, rgba(223, 173, 104, 0.18), transparent 42%),
+    linear-gradient(180deg, #fcfaf6 0%, var(--bg) 100%);
+  color: var(--ink);
+  font: 14px/1.45 "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+.popup {
+  padding: 18px;
+}
+
+.hero h1 {
+  margin: 4px 0 8px;
+  font: 700 22px/1.1 Georgia, "Times New Roman", serif;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.subtle {
+  margin: 0;
+  color: var(--muted);
+}
+
+.panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f0ebe4;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.status.ok {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.status.error {
+  background: #f9e8e3;
+  color: var(--danger);
+}
+
+.button,
+.link-button {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.button {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.button-secondary {
+  background: #2d6a5c;
+}
+
+.link-button {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.locations {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.location {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.location.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.location-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.location-name {
+  font-weight: 700;
+}
+
+.location-path {
+  word-break: break-word;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.location-toggle {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.empty {
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.result {
+  margin-top: 10px;
+}

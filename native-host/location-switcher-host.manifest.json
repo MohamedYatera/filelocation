@@ -1,0 +1,9 @@
+﻿{
+    "path":  "C:\\Users\\yater\\Documents\\GitHub\\filelocation\\native-host\\location-switcher-host.cmd",
+    "description":  "Native host for the Download Path Switcher Firefox extension",
+    "name":  "com.filelocation.download_path_switcher",
+    "allowed_extensions":  [
+                               "download-path-switcher@filelocation.local"
+                           ],
+    "type":  "stdio"
+}
