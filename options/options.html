@@ -35,6 +35,35 @@
 
       <section class="card">
         <div class="section-head">
+          <h2>Routing behavior</h2>
+        </div>
+        <form id="routing-form" class="form">
+          <label class="checkbox-field" for="respect-manual-save-location">
+            <input id="respect-manual-save-location" name="respect-manual-save-location" type="checkbox" />
+            <span>Keep files where you chose to save them in Firefox's Save As window</span>
+          </label>
+
+          <div class="field">
+            <label for="browser-default-download-directory">Firefox default download folder</label>
+            <input
+              id="browser-default-download-directory"
+              name="browser-default-download-directory"
+              type="text"
+              placeholder="C:\Users\you\Downloads"
+            />
+          </div>
+
+          <p class="status-text">
+            Image files are never auto-moved. For other files, when this folder is set, the extension only auto-moves files that first land in that Firefox default folder.
+          </p>
+
+          <button class="button" type="submit">Save routing settings</button>
+          <p id="routing-status" class="status-text" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
           <h2>Folders</h2>
         </div>
         <div id="locations" class="locations"></div>

@@ -1,65 +1,25 @@
 # Download Path Switcher
 
-Firefox does not expose a WebExtension API that directly changes the browser's global default download folder. This project uses the workable approach instead:
+Download Path Switcher is a Windows-only Firefox extension that lets you save multiple download folders, choose one as active, and automatically move completed Firefox downloads into that folder.
 
-- the extension stores multiple saved folders
-- you check one folder to make it active
-- when a Firefox download finishes, a native Windows helper moves the file into the active folder
+Firefox does not expose a normal WebExtension API to directly set an arbitrary absolute Windows download folder. This project uses the supported workaround:
 
-That gives you the fast "switch between saved destinations" workflow without manually changing Firefox settings every time.
+- the extension watches completed downloads
+- the extension stores your saved folder list and active folder
+- a local Windows native helper moves the finished file into the active folder
 
-## Quick setup
+Image files are never auto-moved by the extension. They stay wherever you save them in Firefox. For other file types, if you want files saved through Firefox's `Save As` dialog to stay exactly where you chose, set your normal Firefox default download folder in the extension's `Routing behavior` section. The extension will then only auto-move files that first land in that default folder.
 
-You must run this command before the extension can move downloads:
+## What you must install
 
-```powershell
-.\scripts\install-native-host.ps1
-```
+This project has two parts:
 
-That command registers the Windows native helper with Firefox for your current Windows user.
+1. The Firefox extension
+2. The Windows native helper
 
-After that:
+The extension alone is not enough. You must also register the native helper on Windows.
 
-1. Open Firefox.
-2. Go to `about:debugging#/runtime/this-firefox`.
-3. Click `Load Temporary Add-on`.
-4. Select [manifest.json](C:/Users/yater/Documents/GitHub/filelocation/manifest.json).
-5. Open the extension popup and confirm `Native helper` says `Connected`.
-
-If Firefox still shows `Not installed`, restart Firefox once and check again.
-
-## Project layout
-
-- `manifest.json`: Firefox extension manifest
-- `background.js`: listens for completed downloads and calls the native host
-- `popup/`: quick switcher UI
-- `options/`: manage saved paths
-- `native-host/`: Windows native messaging helper
-- `scripts/install-native-host.ps1`: registers the native host for the current Windows user
-
-## Firefox APIs used
-
-- `storage` for saving folder presets
-- `downloads` for detecting completed downloads
-- `nativeMessaging` for handing file moves to a local helper
-
-This matches Mozilla's WebExtension model:
-
-- Firefox extensions can store settings via the `storage` API and provide an options page. Source: MDN `storage` and `Implement a settings page`.
-- Firefox extensions can watch downloads, and `downloads.download()` only accepts a filename relative to the default downloads directory, not an arbitrary absolute path. Source: MDN `downloads` and `downloads.download()`.
-- Native messaging is the supported way for a Firefox extension to reach local OS resources not exposed by WebExtension APIs. Source: MDN `Native messaging`.
-
-Sources:
-
-- https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage
-- https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Implement_a_settings_page
-- https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/downloads
-- https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/downloads/download
-- https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging
-
-## How to set up the extension
-
-### 1. Register the native helper
+## Quick local test setup
 
 Open PowerShell in the repo root and run:
 
@@ -67,92 +27,249 @@ Open PowerShell in the repo root and run:
 .\scripts\install-native-host.ps1
 ```
 
-This is required. Without it, the extension UI can load, but downloads will not be moved to your selected folder.
+Then open Firefox and load the extension temporarily:
 
-The command writes:
+1. Open `about:debugging#/runtime/this-firefox`
+2. Click `Load Temporary Add-on`
+3. Select [manifest.json](C:/Users/yater/Documents/GitHub/filelocation/manifest.json)
 
-- `native-host/location-switcher-host.manifest.json`
-- `HKCU\Software\Mozilla\NativeMessagingHosts\com.filelocation.download_path_switcher`
+Open the extension popup and confirm `Native helper` says `Connected`.
 
-Firefox uses that registry entry to find the local helper process.
+## Permanent install path
 
-### 2. Add the extension to Firefox
+For a permanent install in regular Firefox, you need a signed `.xpi`.
 
-1. Open Firefox.
-2. Go to `about:debugging#/runtime/this-firefox`.
-3. Click `Load Temporary Add-on`.
-4. Select [manifest.json](C:/Users/yater/Documents/GitHub/filelocation/manifest.json).
+This repo is prepared for the Firefox `unlisted` self-distribution path:
 
-This loads the extension temporarily for development.
+- Mozilla signs the extension
+- the extension is not publicly listed on AMO
+- you install the signed `.xpi` from file in Firefox
 
-### 3. Confirm the helper is connected
+## Exact websites you will use
 
-1. Click the extension icon.
-2. Look at `Native helper`.
-3. It should say `Connected`.
+### AMO Developer Hub
 
-If it says `Not installed`:
+Use this to create your developer account and manage submissions:
 
-1. Make sure you ran:
+- https://addons.mozilla.org/developers/
+
+### AMO API credentials
+
+Use this to generate your API key and secret for `web-ext sign`:
+
+- https://addons.mozilla.org/developers/addon/api/key/
+
+### Firefox Extension Workshop documentation
+
+Official signing and distribution overview:
+
+- https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/
+
+Official self-distribution guide:
+
+- https://extensionworkshop.com/documentation/publish/self-distribution/
+
+Official install-from-file guide:
+
+- https://extensionworkshop.com/documentation/publish/install-self-distributed
+
+## One-time setup for publishing
+
+### 1. Install `web-ext`
+
+Run:
+
+```powershell
+npm install --global web-ext
+web-ext --version
+```
+
+### 2. Create your AMO developer account
+
+1. Go to https://addons.mozilla.org/developers/
+2. Sign in with a Mozilla account
+3. Accept the developer agreement if prompted
+
+### 3. Create AMO API credentials
+
+1. Go to https://addons.mozilla.org/developers/addon/api/key/
+2. Create an API key and secret
+3. Keep both values
+
+You will use them with the signing script.
+
+## Files added for release
+
+- [web-ext-config.mjs](C:/Users/yater/Documents/GitHub/filelocation/web-ext-config.mjs): tells `web-ext` what to package and what to exclude
+- [scripts/build-extension.ps1](C:/Users/yater/Documents/GitHub/filelocation/scripts/build-extension.ps1): builds the extension package
+- [scripts/sign-unlisted.ps1](C:/Users/yater/Documents/GitHub/filelocation/scripts/sign-unlisted.ps1): signs the extension for unlisted self-distribution
+- [amo/reviewer-notes.md](C:/Users/yater/Documents/GitHub/filelocation/amo/reviewer-notes.md): reviewer notes to paste into AMO if needed
+- [amo/self-distribution-checklist.md](C:/Users/yater/Documents/GitHub/filelocation/amo/self-distribution-checklist.md): release checklist
+
+## Exact commands to build and sign
+
+### 1. Build the package
+
+From the repo root:
+
+```powershell
+.\scripts\build-extension.ps1
+```
+
+This creates the extension package in `web-ext-artifacts`.
+
+### 2. Set your AMO credentials in PowerShell
+
+Use your real values:
+
+```powershell
+$env:AMO_JWT_ISSUER = "your-api-key"
+$env:AMO_JWT_SECRET = "your-api-secret"
+```
+
+### 3. Sign for unlisted distribution
+
+Run:
+
+```powershell
+.\scripts\sign-unlisted.ps1
+```
+
+That submits the extension to Mozilla for unlisted signing and downloads the signed `.xpi` into `web-ext-artifacts`.
+
+## Exact submission flow
+
+You have two valid ways to submit the unlisted version.
+
+### Option A: recommended here, use the signing script
+
+1. Create your AMO API credentials
+2. Run:
+
+```powershell
+.\scripts\build-extension.ps1
+$env:AMO_JWT_ISSUER = "your-api-key"
+$env:AMO_JWT_SECRET = "your-api-secret"
+.\scripts\sign-unlisted.ps1
+```
+
+3. Wait for Mozilla signing/validation to complete
+4. The signed `.xpi` will be placed in `web-ext-artifacts`
+
+### Option B: website upload
+
+1. Go to https://addons.mozilla.org/developers/
+2. Click `Submit a New Add-on`
+3. Choose `On your own`
+4. Upload the built package from `web-ext-artifacts`
+5. If asked for source/reviewer details, use [amo/reviewer-notes.md](C:/Users/yater/Documents/GitHub/filelocation/amo/reviewer-notes.md)
+6. Download the signed `.xpi` after signing completes
+
+## Install the signed extension permanently
+
+Once you have the signed `.xpi`:
+
+### 1. Install the native helper on Windows
+
+In PowerShell at the repo root:
 
 ```powershell
 .\scripts\install-native-host.ps1
 ```
 
-2. Restart Firefox once.
-3. Reload the temporary add-on in `about:debugging`.
+### 2. Install the signed `.xpi` in Firefox
 
-### 4. Add your folders
+1. Open Firefox
+2. Open `about:addons`
+3. Click the gear icon
+4. Click `Install Add-on From File`
+5. Select the signed `.xpi`
+6. Accept the install prompt
 
-1. Open the extension popup.
-2. Click `Manage`.
-3. Add one or more absolute Windows paths such as:
+### 3. Confirm it works
+
+1. Open the extension popup
+2. Confirm `Native helper` shows `Connected`
+3. Click `Manage`
+4. In `Routing behavior`, set your Firefox default download folder if you want manual `Save As` locations to be left alone
+5. Add folders such as:
 
 ```text
 C:\Users\yater\Downloads\TestA
 C:\Users\yater\Downloads\TestB
 ```
 
-4. Check the folder you want active.
+6. Check one folder as active
+7. Download a file in Firefox
+8. Confirm the file is moved into the selected folder
 
-### 5. Test it
+## Updating the extension later
 
-1. Download a file in Firefox.
-2. Wait for the download to complete.
-3. The helper should move the file into the currently checked folder.
-4. The popup's `Last result` section will show success or the error message.
+For every new release:
 
-## How to uninstall it
-
-### Remove the extension from Firefox
-
-If it is loaded as a temporary add-on:
-
-1. Open `about:debugging#/runtime/this-firefox`.
-2. Find `Download Path Switcher`.
-3. Click `Remove`.
-
-If Firefox has been closed already, the temporary add-on is already gone, because temporary add-ons do not survive a browser restart.
-
-### Remove the native helper from Windows
-
-Open PowerShell and run:
+1. Increase the version in [manifest.json](C:/Users/yater/Documents/GitHub/filelocation/manifest.json)
+2. Rebuild:
 
 ```powershell
-Remove-Item 'HKCU:\Software\Mozilla\NativeMessagingHosts\com.filelocation.download_path_switcher' -Force
-Remove-Item '.\native-host\location-switcher-host.manifest.json' -Force
+.\scripts\build-extension.ps1
+```
+
+3. Re-sign:
+
+```powershell
+.\scripts\sign-unlisted.ps1
+```
+
+4. Distribute the new signed `.xpi`
+
+## How to uninstall
+
+### Remove the Firefox extension
+
+If installed from file:
+
+1. Open `about:addons`
+2. Find `Download Path Switcher`
+3. Click `Remove`
+
+### Remove the native helper
+
+Run:
+
+```powershell
+.\scripts\uninstall-native-host.ps1
 ```
 
 That removes:
 
-- the Firefox registry entry for the helper
-- the generated native host manifest file
+- `HKCU\Software\Mozilla\NativeMessagingHosts\com.filelocation.download_path_switcher`
+- `native-host/location-switcher-host.manifest.json`
 
-The source files in this repo stay on disk unless you delete the repo yourself.
+## Current manifest/release choices
 
-## Current constraints
+This repo has already been adjusted for modern AMO submission:
 
-- This is Windows-only as written because the native helper and installer target PowerShell and the Windows registry.
-- The extension moves the file after the download completes. It does not rewrite Firefox's own internal download-folder preference.
-- If Firefox is set to always ask where to save each file, the file will still download first, then the helper will move it afterward.
-- This is loaded as a temporary add-on for development. For long-term use, you would package and sign it for Firefox distribution.
+- fixed extension ID is present
+- built-in Firefox data transmission declaration is present
+- minimum Firefox version is set to `140.0`
+- packaging excludes local helper scripts and docs from the signed extension archive
+
+## Firefox APIs used
+
+- `storage`
+- `downloads`
+- `nativeMessaging`
+
+## Sources
+
+- https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage
+- https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/downloads
+- https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/downloads/download
+- https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging
+- https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings
+- https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/
+- https://extensionworkshop.com/documentation/publish/submitting-an-add-on/
+- https://extensionworkshop.com/documentation/publish/self-distribution/
+- https://extensionworkshop.com/documentation/publish/install-self-distributed
+- https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/
+- https://extensionworkshop.com/documentation/develop/firefox-builtin-data-consent/

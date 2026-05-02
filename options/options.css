@@ -83,6 +83,20 @@ h2 {
   gap: 8px;
 }
 
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.checkbox-field input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
 label {
   font-weight: 700;
 }

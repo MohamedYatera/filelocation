@@ -3,6 +3,10 @@ const nameInput = document.getElementById("location-name");
 const pathInput = document.getElementById("location-path");
 const locationsContainer = document.getElementById("locations");
 const formStatus = document.getElementById("form-status");
+const routingForm = document.getElementById("routing-form");
+const respectManualSaveLocationInput = document.getElementById("respect-manual-save-location");
+const browserDefaultDownloadDirectoryInput = document.getElementById("browser-default-download-directory");
+const routingStatus = document.getElementById("routing-status");
 
 async function sendMessage(message) {
   return browser.runtime.sendMessage(message);
@@ -13,9 +17,16 @@ function setStatus(message, isError = false) {
   formStatus.style.color = isError ? "#972d2d" : "#665f58";
 }
 
+function setRoutingStatus(message, isError = false) {
+  routingStatus.textContent = message;
+  routingStatus.style.color = isError ? "#972d2d" : "#665f58";
+}
+
 async function render() {
   const state = await sendMessage({ type: "getState" });
   locationsContainer.textContent = "";
+  respectManualSaveLocationInput.checked = Boolean(state.respectManualSaveLocation);
+  browserDefaultDownloadDirectoryInput.value = state.browserDefaultDownloadDirectory ?? "";
 
   if (!state.locations.length) {
     const empty = document.createElement("div");
@@ -73,6 +84,25 @@ async function render() {
     locationsContainer.append(article);
   }
 }
+
+routingForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  setRoutingStatus("");
+
+  try {
+    await sendMessage({
+      type: "saveRoutingSettings",
+      payload: {
+        respectManualSaveLocation: respectManualSaveLocationInput.checked,
+        browserDefaultDownloadDirectory: browserDefaultDownloadDirectoryInput.value
+      }
+    });
+    setRoutingStatus("Routing settings saved.");
+    await render();
+  } catch (error) {
+    setRoutingStatus(error?.message ?? String(error), true);
+  }
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();

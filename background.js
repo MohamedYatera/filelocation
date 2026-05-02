@@ -2,7 +2,9 @@ const HOST_NAME = "com.filelocation.download_path_switcher";
 const DEFAULT_STATE = {
   locations: [],
   activeLocationId: null,
-  lastMoveResult: null
+  lastMoveResult: null,
+  respectManualSaveLocation: true,
+  browserDefaultDownloadDirectory: ""
 };
 
 const processedDownloads = new Set();
@@ -12,7 +14,9 @@ async function getState() {
   return {
     locations: Array.isArray(stored.locations) ? stored.locations : [],
     activeLocationId: stored.activeLocationId ?? null,
-    lastMoveResult: stored.lastMoveResult ?? null
+    lastMoveResult: stored.lastMoveResult ?? null,
+    respectManualSaveLocation: stored.respectManualSaveLocation ?? true,
+    browserDefaultDownloadDirectory: stored.browserDefaultDownloadDirectory ?? ""
   };
 }
 
@@ -27,6 +31,26 @@ function normalizePath(path) {
 
 function isValidWindowsPath(path) {
   return /^[A-Za-z]:\\/.test(path) || /^\\\\[^\\]+\\[^\\]+/.test(path);
+}
+
+function normalizeComparableWindowsPath(path) {
+  return normalizePath(path).replace(/[\\/]+$/, "").toLowerCase();
+}
+
+function getDirectoryPath(filePath) {
+  const normalized = normalizePath(filePath);
+  const lastSlashIndex = Math.max(normalized.lastIndexOf("\\"), normalized.lastIndexOf("/"));
+  return lastSlashIndex >= 0 ? normalized.slice(0, lastSlashIndex) : "";
+}
+
+function isImageDownload(downloadItem) {
+  const mime = typeof downloadItem?.mime === "string" ? downloadItem.mime.toLowerCase() : "";
+  if (mime.startsWith("image/")) {
+    return true;
+  }
+
+  const fileName = typeof downloadItem?.filename === "string" ? downloadItem.filename.toLowerCase() : "";
+  return /\.(apng|avif|bmp|gif|heic|heif|ico|jpe?g|png|svg|tiff?|webp)$/i.test(fileName);
 }
 
 async function setActiveLocation(locationId) {
@@ -90,6 +114,54 @@ async function pingNativeHost() {
   return browser.runtime.sendNativeMessage(HOST_NAME, { type: "ping" });
 }
 
+async function saveRoutingSettings(payload) {
+  const respectManualSaveLocation = Boolean(payload?.respectManualSaveLocation);
+  const browserDefaultDownloadDirectory = normalizePath(payload?.browserDefaultDownloadDirectory);
+
+  if (browserDefaultDownloadDirectory && !isValidWindowsPath(browserDefaultDownloadDirectory)) {
+    throw new Error("Use an absolute Windows path for the Firefox default download folder.");
+  }
+
+  return saveState({
+    respectManualSaveLocation,
+    browserDefaultDownloadDirectory
+  });
+}
+
+function shouldMoveDownload(downloadItem, state) {
+  if (isImageDownload(downloadItem)) {
+    return {
+      shouldMove: false,
+      message: "Skipped move because image files stay where you save them."
+    };
+  }
+
+  if (!state.respectManualSaveLocation) {
+    return {
+      shouldMove: true
+    };
+  }
+
+  const configuredDefaultDirectory = normalizeComparableWindowsPath(state.browserDefaultDownloadDirectory);
+  if (!configuredDefaultDirectory) {
+    return {
+      shouldMove: true
+    };
+  }
+
+  const sourceDirectory = normalizeComparableWindowsPath(getDirectoryPath(downloadItem.filename));
+  if (sourceDirectory !== configuredDefaultDirectory) {
+    return {
+      shouldMove: false,
+      message: "Skipped move because this file was saved outside the configured Firefox default download folder."
+    };
+  }
+
+  return {
+    shouldMove: true
+  };
+}
+
 async function moveCompletedDownload(downloadId) {
   if (processedDownloads.has(downloadId)) {
     return;
@@ -109,6 +181,21 @@ async function moveCompletedDownload(downloadId) {
 
     if (!downloadItem?.filename) {
       throw new Error("Firefox did not expose a local filename for this download.");
+    }
+
+    const moveDecision = shouldMoveDownload(downloadItem, state);
+    if (!moveDecision.shouldMove) {
+      await browser.storage.local.set({
+        lastMoveResult: {
+          ok: true,
+          fileName: downloadItem.filename.split(/[/\\]/).pop() ?? downloadItem.filename,
+          message: moveDecision.message,
+          targetDirectory: getDirectoryPath(downloadItem.filename),
+          finalPath: downloadItem.filename,
+          timestamp: new Date().toISOString()
+        }
+      });
+      return;
     }
 
     const response = await browser.runtime.sendNativeMessage(HOST_NAME, {
@@ -171,6 +258,8 @@ browser.runtime.onMessage.addListener((message) => {
       return setActiveLocation(message.locationId);
     case "pingNativeHost":
       return pingNativeHost();
+    case "saveRoutingSettings":
+      return saveRoutingSettings(message.payload);
     default:
       return Promise.reject(new Error("Unknown message type."));
   }

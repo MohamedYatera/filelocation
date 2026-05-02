@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Download Path Switcher",
-  "version": "0.1.0",
-  "description": "Save multiple download destinations and route finished Firefox downloads to the currently selected folder.",
+  "version": "0.2.2",
+  "description": "Windows-only Firefox extension that saves multiple download destinations and routes completed downloads to the selected folder using a local native helper.",
   "permissions": [
     "downloads",
     "nativeMessaging",
@@ -27,7 +27,12 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "download-path-switcher@filelocation.local",
-      "strict_min_version": "109.0"
+      "data_collection_permissions": {
+        "required": [
+          "websiteActivity"
+        ]
+      },
+      "strict_min_version": "140.0"
     }
   }
 }
