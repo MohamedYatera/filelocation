@@ -192,14 +192,14 @@ In PowerShell at the repo root:
 2. Confirm `Native helper` shows `Connected`
 3. Click `Manage`
 4. In `Routing behavior`, set your Firefox default download folder if you want manual `Save As` locations to be left alone
-5. Add folders such as:
+5. Add folder paths such as:
 
 ```text
 C:\Users\yater\Downloads\TestA
 C:\Users\yater\Downloads\TestB
 ```
 
-6. Check one folder as active
+6. Check one folder as active, or leave all saved folders unchecked to use Firefox's default location without removing them
 7. Download a file in Firefox
 8. Confirm the file is moved into the selected folder
 

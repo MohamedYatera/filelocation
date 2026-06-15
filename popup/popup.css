@@ -92,7 +92,6 @@ body {
 }
 
 .button {
-  margin-top: 10px;
   padding: 10px 12px;
   border-radius: 12px;
   background: var(--accent);
@@ -115,6 +114,27 @@ body {
   gap: 10px;
 }
 
+.add-form {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.add-form input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.add-form input:focus {
+  outline: 2px solid rgba(23, 89, 74, 0.18);
+  border-color: var(--accent);
+}
+
 .location {
   display: grid;
   gap: 6px;
@@ -135,14 +155,36 @@ body {
   gap: 10px;
 }
 
-.location-name {
-  font-weight: 700;
-}
-
 .location-path {
   word-break: break-word;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.status-text {
+  margin: 8px 0 0;
   color: var(--muted);
   font-size: 12px;
+}
+
+.status-text.error {
+  color: var(--danger);
+}
+
+.location-head {
+  justify-content: flex-start;
+}
+
+.location.active .location-path {
+  color: var(--accent);
+}
+
+.location:not(.active) .location-path::after {
+  content: "Uses Firefox default when unchecked";
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
 }
 
 .location-toggle {

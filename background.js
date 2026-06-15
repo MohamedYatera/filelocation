@@ -65,20 +65,19 @@ async function setActiveLocation(locationId) {
 
 async function addLocation(payload) {
   const state = await getState();
-  const name = typeof payload?.name === "string" ? payload.name.trim() : "";
   const path = normalizePath(payload?.path);
-
-  if (!name) {
-    throw new Error("A name is required.");
-  }
 
   if (!isValidWindowsPath(path)) {
     throw new Error("Use an absolute Windows path such as C:\\Downloads\\Invoices.");
   }
 
+  const comparablePath = normalizeComparableWindowsPath(path);
+  if (state.locations.some((location) => normalizeComparableWindowsPath(location.path) === comparablePath)) {
+    throw new Error("That folder is already saved.");
+  }
+
   const location = {
     id: crypto.randomUUID(),
-    name,
     path
   };
 
@@ -87,7 +86,7 @@ async function addLocation(payload) {
     locations: nextLocations
   };
 
-  if (!state.activeLocationId) {
+  if (!state.activeLocationId && state.locations.length === 0) {
     nextState.activeLocationId = location.id;
   }
 

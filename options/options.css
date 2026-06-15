@@ -171,14 +171,10 @@ input:focus {
   gap: 12px;
 }
 
-.location-name {
-  font-size: 18px;
-  font-weight: 700;
-}
-
 .location-path {
   word-break: break-word;
-  color: var(--muted);
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .location-toggle {
@@ -192,6 +188,19 @@ input:focus {
   background: #f5e8e5;
   color: var(--danger);
   font-weight: 700;
+}
+
+.location.active .location-path {
+  color: var(--accent);
+}
+
+.location:not(.active) .location-path::after {
+  content: "Uses Firefox default when unchecked";
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .status-text {

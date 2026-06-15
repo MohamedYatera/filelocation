@@ -1,5 +1,4 @@
 const form = document.getElementById("location-form");
-const nameInput = document.getElementById("location-name");
 const pathInput = document.getElementById("location-path");
 const locationsContainer = document.getElementById("locations");
 const formStatus = document.getElementById("form-status");
@@ -53,14 +52,10 @@ async function render() {
     checkbox.addEventListener("change", async () => {
       await sendMessage({
         type: "setActiveLocation",
-        locationId: location.id
+        locationId: checkbox.checked ? location.id : null
       });
       await render();
     });
-
-    const name = document.createElement("div");
-    name.className = "location-name";
-    name.textContent = location.name;
 
     const removeButton = document.createElement("button");
     removeButton.type = "button";
@@ -78,7 +73,7 @@ async function render() {
     path.className = "location-path";
     path.textContent = location.path;
 
-    title.append(checkbox, name);
+    title.append(checkbox);
     top.append(title, removeButton);
     article.append(top, path);
     locationsContainer.append(article);
@@ -112,7 +107,6 @@ form.addEventListener("submit", async (event) => {
     await sendMessage({
       type: "addLocation",
       payload: {
-        name: nameInput.value,
         path: pathInput.value
       }
     });

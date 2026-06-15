@@ -29,6 +29,17 @@
           <strong>Saved folders</strong>
           <button id="open-options" class="link-button" type="button">Manage</button>
         </div>
+        <form id="add-location-form" class="add-form">
+          <input
+            id="add-location-path"
+            name="add-location-path"
+            type="text"
+            placeholder="C:\Users\you\Documents\Invoices"
+            required
+          />
+          <button class="button" type="submit">Add path</button>
+        </form>
+        <p id="add-location-status" class="status-text" aria-live="polite"></p>
         <div id="locations" class="locations" aria-live="polite"></div>
       </section>
 

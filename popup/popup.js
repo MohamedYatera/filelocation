@@ -3,6 +3,9 @@ const locationsContainer = document.getElementById("locations");
 const lastResult = document.getElementById("last-result");
 const openOptionsButton = document.getElementById("open-options");
 const checkHelperButton = document.getElementById("check-helper");
+const addLocationForm = document.getElementById("add-location-form");
+const addLocationPathInput = document.getElementById("add-location-path");
+const addLocationStatus = document.getElementById("add-location-status");
 
 async function sendMessage(message) {
   return browser.runtime.sendMessage(message);
@@ -31,7 +34,7 @@ async function renderLocations(state) {
   if (!state.locations.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "No folders saved yet. Use Manage to add one.";
+    empty.textContent = "No folders saved yet. Add one here or open Manage.";
     locationsContainer.append(empty);
     return;
   }
@@ -50,23 +53,24 @@ async function renderLocations(state) {
     checkbox.addEventListener("change", async () => {
       await sendMessage({
         type: "setActiveLocation",
-        locationId: location.id
+        locationId: checkbox.checked ? location.id : null
       });
       await refresh();
     });
-
-    const name = document.createElement("span");
-    name.className = "location-name";
-    name.textContent = location.name;
 
     const path = document.createElement("div");
     path.className = "location-path";
     path.textContent = location.path;
 
-    head.append(checkbox, name);
+    head.append(checkbox);
     label.append(head, path);
     locationsContainer.append(label);
   }
+}
+
+function setAddLocationStatus(message, isError = false) {
+  addLocationStatus.textContent = message;
+  addLocationStatus.className = `status-text ${isError ? "error" : ""}`.trim();
 }
 
 async function checkHelper() {
@@ -92,6 +96,25 @@ openOptionsButton.addEventListener("click", () => {
 
 checkHelperButton.addEventListener("click", () => {
   void checkHelper();
+});
+
+addLocationForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  setAddLocationStatus("");
+
+  try {
+    await sendMessage({
+      type: "addLocation",
+      payload: {
+        path: addLocationPathInput.value
+      }
+    });
+    addLocationForm.reset();
+    setAddLocationStatus("Folder added.");
+    await refresh();
+  } catch (error) {
+    setAddLocationStatus(error?.message ?? String(error), true);
+  }
 });
 
 void Promise.all([refresh(), checkHelper()]);
